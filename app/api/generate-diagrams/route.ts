@@ -9,7 +9,7 @@ import {
     type QualityMode,
 } from "./prompts";
 
-export const runtime = "nodejs"; // ensure Node runtime (for OpenAI SDK)
+export const runtime = "nodejs";
 
 const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -20,11 +20,10 @@ type GenerateRequestBody = {
     preset?: PresetType | "";
     style?: StyleType;
 
-    // new advanced fields (optional)
-    quality?: QualityMode; // "draft" | "portfolio"
-    emphasis?: EmphasisType; // "all" | "massing" | ...
-    multiIntent?: boolean; // true => generate 4 diagrams
-    count?: number; // optional override (1-4)
+    quality?: QualityMode;     // "draft" | "portfolio"
+    emphasis?: EmphasisType;   // "all" | "massing" | ...
+    multiIntent?: boolean;     // true => multiple intents
+    count?: number;            // 1-4
 };
 
 type DiagramResult = {
@@ -51,14 +50,10 @@ export async function POST(req: NextRequest) {
         const preset = (body.preset ?? "") as PresetType | "";
         const style = (body.style ?? "minimal") as StyleType;
 
-        // advanced (backward compatible defaults)
         const quality = (body.quality ?? "portfolio") as QualityMode;
         const emphasis = (body.emphasis ?? "all") as EmphasisType;
         const multiIntent = Boolean(body.multiIntent);
 
-        // how many diagrams to return
-        // - if multiIntent: default 4
-        // - else: default 2 (same as your MVP)
         const requestedCount =
             typeof body.count === "number"
                 ? clamp(Math.floor(body.count), 1, 4)
@@ -73,13 +68,15 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Build intents list
+        // Decide intents:
+        // - multiIntent: generate multiple different intents (each 1 image)
+        // - single intent: one intent, but multiple variations (n = requestedCount)
         const intents = multiIntent
             ? getIntentPresets(preset).slice(0, requestedCount)
             : ["Primary diagram output"];
 
-        // Helper: generate one image for a given intent
-        async function generateOne(intent: string): Promise<DiagramResult> {
+        // Generate for one intent
+        async function generateForIntent(intent: string): Promise<DiagramResult[]> {
             const finalPrompt = buildDiagramPrompt({
                 userPrompt: prompt,
                 preset,
@@ -89,32 +86,32 @@ export async function POST(req: NextRequest) {
                 intent,
             });
 
+            const n = multiIntent ? 1 : requestedCount;
+
             const resp: any = await client.images.generate({
                 model: "gpt-image-1",
                 prompt: finalPrompt,
-                n: 1,
+                n,
                 size: "1024x1024",
             });
 
-            const b64 = resp?.data?.[0]?.b64_json;
-            if (!b64) {
+            const data = Array.isArray(resp?.data) ? resp.data : [];
+            const b64s = data.map((d: any) => d?.b64_json).filter(Boolean);
+
+            if (b64s.length === 0) {
                 throw new Error("Image API returned empty data.");
             }
 
-            return { intent, b64 };
+            return b64s.map((b64: string) => ({ intent, b64 }));
         }
 
-        // Generate diagrams
-        // NOTE: for stability/rate-limits, do sequential generation (safer).
+        // Generate results (sequential for stability)
         const results: DiagramResult[] = [];
         for (const intent of intents) {
-            const item = await generateOne(intent);
-            results.push(item);
+            const items = await generateForIntent(intent);
+            results.push(...items);
         }
 
-        // Backward compatible response:
-        // - keep `images` array for your existing frontend
-        // - also return `results` with intent metadata
         return NextResponse.json({
             images: results.map((r) => r.b64),
             results,
@@ -125,17 +122,13 @@ export async function POST(req: NextRequest) {
                 emphasis,
                 multiIntent,
                 count: results.length,
+                requestedCount,
             },
         });
     } catch (err: any) {
         console.error("Error generating diagrams:", err);
 
-        // Surface OpenAI error message if present
-        const msg =
-            err?.error?.message ||
-            err?.message ||
-            "Failed to generate diagrams.";
-
+        const msg = err?.error?.message || err?.message || "Failed to generate diagrams.";
         const status = err?.status || 500;
 
         return NextResponse.json({ error: msg }, { status });

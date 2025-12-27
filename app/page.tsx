@@ -16,8 +16,8 @@ type PresetType =
 
 const DICT = {
   en: {
-    title: "AI Diagram Generator",
-    subtitle: "for Architectural Thinking",
+    title: "Diagram Intent",
+    subtitle: "Architectural Diagramming with Design Intent",
     language: "Language",
     designQuestion: "What design question are you exploring?",
     preset: {
@@ -62,8 +62,8 @@ const DICT = {
     goalHigh: "High control (presentation-ready)",
   },
   zh: {
-    title: "AI Diagram Generator",
-    subtitle: "建筑设计思维辅助工具",
+    title: "Diagram Intent",
+    subtitle: "以设计意图为核心的建筑图解工具",
     language: "语言",
     designQuestion: "你正在探索什么设计问题？",
     preset: {
@@ -138,6 +138,8 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [count, setCount] = useState<number>(3);
+
   const presetHint = useMemo(() => {
     const map: Record<PresetType, string> = {
       massing: lang === "en" ? "Hierarchy, block volumes" : "层级、块状体量",
@@ -205,6 +207,8 @@ export default function Page() {
           preset: preset === "custom" ? "" : preset,
           style,
           prompt,
+          count: 3,
+          multiIntent: false,
         }),
       });
 
@@ -341,6 +345,40 @@ export default function Page() {
                       </button>
                   ))}
                 </div>
+
+                {/* Variations */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-neutral-200">
+                      Variations
+                    </div>
+
+                    <div className="text-xs text-neutral-500">
+                      Output count
+                    </div>
+                  </div>
+
+                  <div className="mt-2">
+                    <select
+                        value={count}
+                        onChange={(e) => setCount(Number(e.target.value))}
+                        className={cx(
+                            "w-full rounded-xl border border-white/10",
+                            "bg-black/30 px-3 py-2 text-sm text-neutral-100",
+                            "focus:outline-none focus:ring-2 focus:ring-white/20"
+                        )}
+                    >
+                      <option value={1}>1 variation</option>
+                      <option value={2}>2 variations</option>
+                      <option value={3}>3 variations</option>
+                    </select>
+                  </div>
+
+                  <div className="mt-1 text-[12.5px] text-neutral-400 leading-relaxed">
+                    Generate multiple diagram variations for comparison.
+                  </div>
+                </div>
+
 
                 {/* ---- Design Intent Panel ---- */}
                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
