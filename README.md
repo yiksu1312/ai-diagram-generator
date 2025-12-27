@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Diagram Generator
 
-## Getting Started
+An experimental **AI-assisted architectural diagram generator** built with **Next.js (App Router)**.  
+This tool helps designers quickly explore **massing, circulation, zoning, program hierarchy, and spatial concepts** through structured prompts and AI-generated diagrams.
 
-First, run the development server:
+The project focuses on **prompt clarity, design intent, and controllability**, rather than treating AI as a black box.
 
+---
+
+## ✨ Features
+
+- **Architectural diagram presets**
+    - Massing & Volume
+    - Circulation Flow
+    - Program Zoning
+    - Program Hierarchy
+    - Spatial Experience
+    - Design Process
+    - Custom prompt
+
+- **Prompt Workspace with feedback**
+    - Real-time **Prompt Strength analysis** (Exploratory → Focused → Precise)
+    - Signals & suggestions to improve prompt clarity
+    - Example prompts (click to insert)
+    - Design-oriented tags (axonometric, hierarchy, arrows, etc.)
+
+- **Design Intent Panel**
+    - Summarizes current diagram type, focus, visual language, and generation goal
+    - Helps users understand *what* they are actually asking the AI to generate
+
+- **Style control**
+    - Minimal (Black & White)
+    - Bold (RGB / conceptual layers)
+
+- **Result gallery**
+    - AI-generated diagrams
+    - One-click download
+
+---
+
+## 🧠 Why this project?
+
+Most AI image tools focus on visual novelty.  
+This project explores how **architectural thinking can be encoded into prompts**, helping users:
+
+- Translate design intent into structured language
+- Understand why vague prompts produce unstable results
+- Iteratively refine ideas before committing to detailed design work
+
+It is designed as a **thinking aid**, not a replacement for design judgment.
+
+---
+
+## 🛠 Tech Stack
+
+- **Next.js 14** (App Router)
+- **React (Client Components)**
+- **TypeScript**
+- **Tailwind CSS**
+- **AI image generation API** (via `/api/generate-diagrams`)
+- Deployed-ready for **Vercel**
+
+---
+
+## 🚀 Getting Started
+
+### Install dependencies
 ```bash
-npm run dev
+npm install
 # or
-yarn dev
+yarn
 # or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+pnpm install
